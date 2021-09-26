@@ -4,6 +4,7 @@ import Geolocation from 'react-native-geolocation-service';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import NavigationScreens from "../navigation_screens";
 import { permissionPrompt } from "./permission_prompt";
+import { TapGestureHandler } from "react-native-gesture-handler";
 
 
 export default class UploadScreen extends Component {
@@ -59,6 +60,10 @@ export default class UploadScreen extends Component {
                     this.onError
                 );
             });
+    }
+
+    onTagPress = () => {
+        this.setState({tagPopupVisible: !this.state.tagPopupVisible})
     }
 
     render() {
