@@ -2,7 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Component } from 'react';
 import MapActivity from './src/map_activity/map_activity';
-import CameraActivity from './src/camera_activity';
+import CameraActivity from './src/camera_activity/camera_activity';
 import UploadScreen from './src/upload_screen';
 import ViewImageActivity from './src/view_image';
 import NavigationScreens from './src/navigation_screens';
