@@ -2,9 +2,13 @@ import React, { Component } from "react";
 import { View, Button, PermissionsAndroid, Modal, Text, CheckBox } from "react-native";
 import Geolocation from 'react-native-geolocation-service';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
+import NavigationScreens from "../navigation_screens";
+import { permissionPrompt } from "./permission_prompt";
+import { TapGestureHandler } from "react-native-gesture-handler";
 
 
 export default class UploadScreen extends Component {
+    INTERVALS = {interval: 1000, fastInterval: 1000}
     constructor(props) {
         super(props);
 
@@ -20,31 +24,20 @@ export default class UploadScreen extends Component {
     }
 
     onViewImagePress() {
-        this.props.navigation.navigate('view_image', {uri: this.image_data.uri});
+        this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {uri: this.image_data.uri});
     }
-
-    setLocation() {
-        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded(
-            {interval: 1000, fastInterval: 1000}
-        ).then((data) => {    
-            Geolocation.getCurrentPosition((position) => {
-                this.longitude = position.coords.longitude;
-                this.latitude = position.coords.latitude;
-            }, (error) => {
-                console.log(error);
-            });
-        });
+    
+    setLatLng = (position) => {
+        this.longitude = position.coords.longitude;
+        this.latitude = position.coords.latitude;
+    }
+    onError(error) {
+        console.log(error);
     }
 
     onGetLocationPress = async () => {
         try {
-            const result = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-                {
-                    title: 'Location Permission',
-                    message: 'Give me location permission',
-                    buttonPositive: "OK"
-            });
+            const result = await this.requestLocationPermissions();
     
             if (result == PermissionsAndroid.RESULTS.GRANTED) {
                 this.setLocation();
@@ -53,12 +46,24 @@ export default class UploadScreen extends Component {
             console.log(error);
         }
     }
-    
-    onTagPress = () => {
-        this.setState({tagPopupVisible: !this.state.tagPopupVisible});
+    async requestLocationPermissions() {
+        return await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            permissionPrompt
+        );
     }
-    onChecked(id) {
-        
+    setLocation() {
+        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded(this.INTERVALS)
+            .then(() => {    
+                Geolocation.getCurrentPosition(
+                    this.setLatLng, 
+                    this.onError
+                );
+            });
+    }
+
+    onTagPress = () => {
+        this.setState({tagPopupVisible: !this.state.tagPopupVisible})
     }
 
     render() {
