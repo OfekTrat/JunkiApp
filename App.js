@@ -3,8 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { Component } from 'react';
 import MapActivity from './src/map_activity/map_activity';
 import CameraActivity from './src/camera_activity/camera_activity';
-import UploadScreen from './src/upload_screen';
-import ViewImageActivity from './src/view_image';
+import UploadScreen from './src/upload_finding_activity/upload_screen';
+import ViewImageActivity from './src/upload_finding_activity/view_image';
 import NavigationScreens from './src/navigation_screens';
 
 
