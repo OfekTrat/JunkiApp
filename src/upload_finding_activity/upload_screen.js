@@ -30,6 +30,10 @@ export default class UploadScreen extends Component {
         this.getLocation();
     }
 
+    navToMap = () => {
+        this.props.navigation.navigate(NavigationScreens.MAP);
+    }
+
     getPossibleTags() {
         return [
             {key: 1, tag: "Electrical"}, 
@@ -43,18 +47,18 @@ export default class UploadScreen extends Component {
         this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {uri: this.image_data.uri});
     }
     
-    getLocation = async () => {
-        try {
-            const result = await this.requestLocationPermissions();
-    
+    getLocation = () => {
+        this.requestLocationPermissions().then((result) => {
             if (result == PermissionsAndroid.RESULTS.GRANTED) {
                 this.setLocation();
             } else {
                 Alert.alert("Permission not permitted");
+                this.navToMap();
             }
-        } catch(error) {
-            console.log(error);
-        }
+        }).catch((error) => {
+            Alert.alert("Something went wrong");
+            this.navToMap();
+        }); 
     }
     async requestLocationPermissions() {
         return await PermissionsAndroid.request(
@@ -69,6 +73,9 @@ export default class UploadScreen extends Component {
                     this.setLatLng, 
                     this.onError
                 );
+            }).catch((error) => {
+                Alert.alert("You need to give use permissions");
+                this.navToMap();
             });
     }
     setLatLng = (position) => {
@@ -104,7 +111,7 @@ export default class UploadScreen extends Component {
             this.processImageData(this.image_data).then((image) => {
                 const finding = new Finding(timestamp, this.location, this.tags, image[0], image[1]);
                 UploadFinding.upload(finding);
-                this.props.navigation.navigate(NavigationScreens.MAP);
+                this.navToMap();
             })
         } else {
             Alert.alert('You did not finish all the steps');
