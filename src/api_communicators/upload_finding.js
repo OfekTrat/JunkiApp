@@ -14,7 +14,6 @@ export default class UploadFinding {
 
         fetch(request).then(
             (response) => {
-                console.log("Uploading Request");
                 if (response.status == 200) {
                     Alert.alert("Upload Successful")
                 } else {
@@ -39,7 +38,6 @@ export default class UploadFinding {
     }
     static buildRequest(payload) {
         const url = "http://".concat(ApiConstants.HOST, this.URI);
-        console.log(payload);
         
         return new Request(
             url,
