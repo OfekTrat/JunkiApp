@@ -3,12 +3,13 @@ import { View, Button, PermissionsAndroid, Modal, Text, CheckBox, Alert, } from 
 import Geolocation from 'react-native-geolocation-service';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import NavigationScreens from "../navigation_screens";
-import { permissionPrompt } from "./permission_prompt";
+import { permissionPrompt } from "../location_handler/permission_prompt";
 import PickerCheckBox from 'react-native-picker-checkbox';
 import Finding from "../finding";
 import Location from "../location";
 import UploadFinding from "../api_communicators/upload_finding";
 import RNFS from 'react-native-fs';
+import LocationHandler from "../location_handler/location_handler";
 
 
 export default class UploadScreen extends Component {
@@ -24,7 +25,6 @@ export default class UploadScreen extends Component {
         this.possibleTags = this.getPossibleTags();
 
         this.onViewImagePress = this.onViewImagePress.bind(this);
-        this.setLocation = this.setLocation.bind(this);
         this.onUploadPress = this.onUploadPress.bind(this);
 
         this.getLocation();
@@ -47,42 +47,16 @@ export default class UploadScreen extends Component {
         this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {uri: this.image_data.uri});
     }
     
-    getLocation = () => {
-        this.requestLocationPermissions().then((result) => {
-            if (result == PermissionsAndroid.RESULTS.GRANTED) {
-                this.setLocation();
-            } else {
-                Alert.alert("Permission not permitted");
-                this.navToMap();
-            }
-        }).catch((error) => {
-            Alert.alert("Something went wrong");
-            this.navToMap();
-        }); 
-    }
-    async requestLocationPermissions() {
-        return await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            permissionPrompt
-        );
-    }
-    setLocation() {
-        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded(this.INTERVALS)
-            .then(() => {    
-                Geolocation.getCurrentPosition(
-                    this.setLatLng, 
-                    this.onError
-                );
-            }).catch((error) => {
-                Alert.alert("You need to give use permissions");
-                this.navToMap();
-            });
+    getLocation = async () => {
+        await LocationHandler.requestLocationPermission();
+        await LocationHandler.getLocation(this.setLatLng, this.onPermissionRejected);
     }
     setLatLng = (position) => {
         this.location = new Location(position.coords.longitude, position.coords.latitude)
     }
-    onError(error) {
-        console.log(error);
+    onPermissionRejected = () => {
+        Alert.alert("You need to enable location!!");
+        this.navToMap();
     }
 
     renderTagsPicker = () => {
