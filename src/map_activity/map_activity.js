@@ -16,7 +16,7 @@ const defaultRegion = {
 
 export default class MapActivity extends Component {
     DEGREES_TO_KM = 111;
-    MAXIMUM_RADIUS = 100;
+    MAXIMUM_RADIUS = 10000;
 
     constructor(props) {
         super(props);
@@ -37,7 +37,7 @@ export default class MapActivity extends Component {
         const payload = this.generatePayloadByRegion(region);
 
         if (payload.radius <= this.MAXIMUM_RADIUS) {
-            GetFindingByRadius.get_results(this.setVisibleMarkers, payload);
+            GetFindingByRadius.get(this.setVisibleMarkers, payload);
         } else {
             this.setState({visible_markers: <View/>})
         }

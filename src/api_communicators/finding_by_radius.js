@@ -7,7 +7,7 @@ export default class GetFindingByRadius {
     static METHOD = "POST";
 
 
-    static get_results(response_listener, payload) {
+    static get(response_listener, payload) {
         const request = this.buildRequest(payload);
         fetch(request).then(response => response.json()
         ).then(data => {
@@ -20,7 +20,7 @@ export default class GetFindingByRadius {
     }
 
     static buildRequest(payload) {
-        const url = "http://".concat(ApiConstants.HOST, ":", ApiConstants.PORT, this.URI);
+        const url = "http://".concat(ApiConstants.HOST, this.URI);
         return new Request(
             url,
             {
