@@ -63,7 +63,9 @@ export default class RegisterActivity extends React.Component {
             if (result) {
                 Alert.alert("Successful Upload");
                 await this.setItem(user.id);
+                console.log(this.props.signInCallback);
                 this.props.signInCallback();
+                this.props.navigation.navigate(NavigationScreens.MAP);
             } else {
                 Alert.alert("User already exists");
             }
