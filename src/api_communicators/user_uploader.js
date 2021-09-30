@@ -20,7 +20,7 @@ export default class UserUploader {
     }
     static buildRequest(user) {
         const url = "http://".concat(ApiConstants.HOST, this.URI)
-        console.log(user.toJson())
+        
         return new Request(
             url,
             {

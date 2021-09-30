@@ -7,6 +7,7 @@ import NavigationScreens from "../../navigation_screens";
 import UserUploader from "../../api_communicators/user_uploader";
 import User from "../../user";
 import { style } from "./register_style";
+import Location from '../../location';
 
 
 
@@ -18,9 +19,9 @@ export default class RegisterActivity extends React.Component {
         super(props);
 
         this.state = {
-            userIdInput: "Enter user here",
-            radiusInput: "Enter radius here",
-            location: null,
+            userIdInput: "",
+            radiusInput: 0,
+            location: new Location(0, 0),
             tags: []
         }
 
@@ -44,12 +45,17 @@ export default class RegisterActivity extends React.Component {
         this.setState({userIdInput: text});
     }
     onRadiusChange = (radius) => {
-        this.setState({radiusInput: radius});
+        if (radius == "") {
+            this.setState({radiusInput: 0});
+        } else {
+            this.setState({radiusInput: radius});
+        }
+        
     }
 
     register = async () => {
         this.setState({ location: this.getLocation() });
- 
+
         if (this.isRadiusValid(this.state.radiusInput)) {
             const user = this.createUser();
             const result = await UserUploader.upload(user);
@@ -57,7 +63,7 @@ export default class RegisterActivity extends React.Component {
             if (result) {
                 Alert.alert("Successful Upload");
                 await this.setItem(user.id);
-                this.props.navigation.navigate(NavigationScreens.MAP)
+                this.props.signInCallback();
             } else {
                 Alert.alert("User already exists");
             }
@@ -68,8 +74,11 @@ export default class RegisterActivity extends React.Component {
     getLocation = () => {
         if (this.props.route.params != null) {
             return this.props.route.params.location;
+        } else {
+            this.setState({radiusInput: 0});
+            return this.state.location;
         }
-        return null;
+        
     }
     isRadiusValid(radius) {
         return !isNaN(radius);
@@ -89,44 +98,49 @@ export default class RegisterActivity extends React.Component {
                 DescriptionField="tag"
                 KeyField="key"
                 placeholder="Select Some Tags"/>
-        )
+        );
     }
 
     setRelevantTags = (tags) => {
-        tags = [];
+        const newTags = [];
 
         for (let i = 0; i < tags.length; i++) {
-            tags.push(tags[i].tag);
+            newTags.push(tags[i].tag);
         }
-
-        this.setState({ tags: tags });
+        this.setState({ tags: newTags });
     }  
 
     onMapPress = () => {
         this.props.navigation.navigate(NavigationScreens.POINT_CHOOSER);
     }
 
-    renderTextInput(value, onChangeCallback) {
+    renderUserIdInput() {
         return (
             <TextInput
-                value={value}
-                onChangeText={onChangeCallback}
+                placeholder="Enter user here"
+                onChangeText={this.onUserIdChange}
                 style={style.textInput}/>
         );
     }
-    renderButton(title, onPressCallback) {
+
+    renderRadiusInput() {
         return (
-            <Button
-                title={title}
-                onPress={onPressCallback}/>
+            <TextInput
+                onChangeText={this.onRadiusChange}
+                placeholder="Enter radius here"
+                style={style.textInput}/>
         );
+    }
+
+    renderButton(title, onPressCallback) {
+        return <Button title={title} onPress={onPressCallback}/>;
     }
 
     render() {
         return (
             <View>
-                {this.renderTextInput(this.state.userIdInput, this.onUserIdChange)}
-                {this.renderTextInput(this.state.radiusInput, this.onRadiusChange)}
+                {this.renderUserIdInput()}
+                {this.renderRadiusInput()}
                 {this.renderTagsPicker()}
                 {this.renderButton(this.BUTTON_CHOOSE_POINT_TITLE, this.onMapPress)}
                 {this.renderButton(this.REGISTER_TITLE, this.register)}
