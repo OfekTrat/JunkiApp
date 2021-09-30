@@ -65,7 +65,7 @@ export default class RegisterActivity extends React.Component {
                 await this.setItem(user.id);
                 console.log(this.props.signInCallback);
                 this.props.signInCallback();
-                this.props.navigation.navigate(NavigationScreens.MAP);
+                this.props.navigation.navigate(NavigationScreens.MAP);  
             } else {
                 Alert.alert("User already exists");
             }

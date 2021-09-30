@@ -17,7 +17,7 @@ export default class LoginActivity extends React.Component {
         this.getItem = getItem;
         this.setItem = setItem;
         this.state = {
-            inputText: 'Enter User Here'
+            inputText: ''
         }
     }
 
@@ -49,14 +49,12 @@ export default class LoginActivity extends React.Component {
         this.props.navigation.navigate(NavigationScreens.REGISTER);
     }
 
-    
-
     render()  {
         return (
             <View
                 style={style.containerStyle}>
                 <TextInput 
-                    value={this.state.inputText}
+                    placeholder="Enter User Here"
                     onChangeText={this.changeText}
                     style={style.inputTextStyle}/>
                 <Button title={this.LOGIN_TITLE} onPress={this.onLoginPress}/>
