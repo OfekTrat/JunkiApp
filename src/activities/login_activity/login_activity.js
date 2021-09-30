@@ -19,15 +19,6 @@ export default class LoginActivity extends React.Component {
         this.state = {
             inputText: 'Enter User Here'
         }
-        this.isConnected();
-    }
-    
-    isConnected = async () => {
-        await AsyncStorage.clear();   // Erase this #############
-        const user = await this.getItem()
-        if (user != null) {
-            this.navToMap();
-        }
     }
 
     onLoginPress = async () => {
@@ -36,7 +27,7 @@ export default class LoginActivity extends React.Component {
 
             if (this.isUserExists(user)) {
                 await this.setItem(user.id);
-                this.navToMap();
+                this.props.signInCallback();
             } else {
                 Alert.alert("User does not exist");
             }

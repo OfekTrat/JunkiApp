@@ -10,12 +10,12 @@ export default class UserUploader {
         const request = this.buildRequest(user);
         const response = await fetch(request);
         const status = response.status;
-        console.log(status);
+
         if (status == 200) {
-            return user;
+            return true;
         } else {
             console.log(await response.json());
-            return null
+            return false
         }
     }
     static buildRequest(user) {

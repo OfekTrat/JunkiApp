@@ -9,22 +9,63 @@ import NavigationScreens from './src/navigation_screens';
 import LoginActivity from './src/activities/login_activity/login_activity';
 import RegisterActivity from './src/activities/register_activity/register_activity';
 import ChoosePointActivity from './src/activities/register_activity/choose_point_activity';
+import WaitActivity from './src/activities/wait_activity';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from './src/constants';
+import { View, Text } from 'react-native';
 
 
 const Stack = createNativeStackNavigator();
 
 
+
 export default class App extends Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            isSigned: false,
+            isLoading: true
+        };
+        this.setSigned();
+    }
+
+    async setSigned() {
+        await AsyncStorage.clear();
+        const user = await AsyncStorage.getItem(Constants.USER_LOCAL_STORAGE);
+
+        if (user == null) {
+            this.setState({ isSigned: false, isLoading: false});
+        } else {
+            this.setState({ isSigned: true, isLoading: false });
+        }        
+    }
+
+    signInCallback = () => {
+        this.setState({ isSigned: true});
+    }
+
+    renderScreenByUser = () => {
+        if (this.state.isSigned) {
+            return (<Stack.Screen name={NavigationScreens.MAP} component={MapActivity}/>);
+        } else {
+            return (
+                <Stack.Screen
+                    name={NavigationScreens.LOGIN}>
+                    {props => <LoginActivity {...props} signInCallback={this.signInCallback}/>}
+                </Stack.Screen>
+            );
+        }
     }
 
     render() {
+        if (this.state.isLoading) {
+            return <WaitActivity/>
+        }
         return (
             <NavigationContainer>
-                <Stack.Navigator initialRouteName={NavigationScreens.LOGIN}>
-                    <Stack.Screen name={NavigationScreens.LOGIN} component={LoginActivity}/>
-                    <Stack.Screen name={NavigationScreens.MAP} component={MapActivity}/>
+                <Stack.Navigator>
+                    { this.renderScreenByUser() }
                     <Stack.Screen name={NavigationScreens.CAMERA} component={CameraActivity}/>
                     <Stack.Screen name={NavigationScreens.UPLOAD_FINDING} component={UploadScreen}/>
                     <Stack.Screen name={NavigationScreens.VIEW_IMAGE} component={ViewImageActivity}/>

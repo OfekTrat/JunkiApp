@@ -17,11 +17,10 @@ const defaultRegion = {
 export default class ChoosePointActivity extends React.Component {
     constructor(props) {
         super(props);
-
         this.state = {
-            markerPosition: defaultRegion
+            markerVisible: false,
+            location: null
         };
-
         this.initialRegion = defaultRegion
         this.chooseCallback = this.props.callback;
     }
@@ -31,8 +30,27 @@ export default class ChoosePointActivity extends React.Component {
     }
 
     onChoosePress = () => {
-        const location = new Location(this.state.markerPosition.longitude, this.state.markerPosition.latitude);
-        this.props.navigation.navigate(NavigationScreens.REGISTER, { location: location });
+        this.props.navigation.navigate(NavigationScreens.REGISTER, { location: this.state.location });
+    }
+
+    onMapPress = (e) => {
+        const location = new Location(e.nativeEvent.coordinate.longitude, e.nativeEvent.coordinate.latitude);
+        this.setState({ 
+            location: location,
+            markerVisible: true
+        });
+    }
+
+    getMarker = () => {
+        if (this.state.markerVisible) {
+            return (
+                <Marker
+                    coordinate={{
+                        latitude: this.state.location.latitude,
+                        longitude: this.state.location.longitude
+                    }}/>
+            )
+        }
     }
 
     render() {
@@ -43,10 +61,9 @@ export default class ChoosePointActivity extends React.Component {
                     provider={PROVIDER_GOOGLE}
                     style={style_map.map}
                     initialRegion={this.initialRegion}
-                    onRegionChange={this.onRegionChange}>   
-                        <Marker draggable
-                            coordinate={this.state.markerPosition}>
-                        </Marker>
+                    onRegionChange={this.onRegionChange}
+                    onPress={this.onMapPress}>
+                        {this.getMarker()}
                 </MapView>
                 <View>
                     <Button title="Choose" onPress={this.onChoosePress}/>
