@@ -1,15 +1,12 @@
 import React, { Component } from "react";
 import { View, Button, PermissionsAndroid, Modal, Text, CheckBox, Alert, } from "react-native";
-import Geolocation from 'react-native-geolocation-service';
-import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-import NavigationScreens from "../navigation_screens";
-import { permissionPrompt } from "../location_handler/permission_prompt";
+import NavigationScreens from "../../navigation_screens";
 import PickerCheckBox from 'react-native-picker-checkbox';
-import Finding from "../finding";
-import Location from "../location";
-import UploadFinding from "../api_communicators/upload_finding";
+import Finding from "../../finding";
+import Location from "../../location";
+import UploadFinding from "../../api_communicators/upload_finding";
 import RNFS from 'react-native-fs';
-import LocationHandler from "../location_handler/location_handler";
+import LocationHandler from "../../location_handler/location_handler";
 
 
 export default class UploadScreen extends Component {
