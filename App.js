@@ -12,11 +12,9 @@ import ChoosePointActivity from './src/activities/register_activity/choose_point
 import WaitActivity from './src/activities/wait_activity';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from './src/constants';
-import { View, Text } from 'react-native';
 
 
 const Stack = createNativeStackNavigator();
-
 
 
 export default class App extends Component {
@@ -69,7 +67,9 @@ export default class App extends Component {
                     <Stack.Screen name={NavigationScreens.CAMERA} component={CameraActivity}/>
                     <Stack.Screen name={NavigationScreens.UPLOAD_FINDING} component={UploadScreen}/>
                     <Stack.Screen name={NavigationScreens.VIEW_IMAGE} component={ViewImageActivity}/>
-                    <Stack.Screen name={NavigationScreens.REGISTER} component={RegisterActivity}/>
+                    <Stack.Screen name={NavigationScreens.REGISTER}>
+                        {props => <RegisterActivity {...props} signInCallback={this.signInCallback}/>}
+                    </Stack.Screen>
                     <Stack.Screen name={NavigationScreens.POINT_CHOOSER} component={ChoosePointActivity}/>
                 </Stack.Navigator>
             </NavigationContainer>
