@@ -10,24 +10,16 @@ export default class UserGetter {
     static URI = "/user";
 
     static async get(userId){
-        try {
-            const request = UserGetter.buildRequest(userId);
-            const response = await fetch(request);
-            const status = response.status;
+        const request = UserGetter.buildRequest(userId);
+        const response = await fetch(request);
+        const status = response.status;
 
-            if (status == 200) {
-                const jsonResp = await response.json();
-                return this.createUserFromJson(jsonResp.result);
-            } else {
-                Alert.alert("User does not exist");
-                return null;
-            }
-        } catch(err) {
-            console.log(err.message);
-            Alert.alert(err.message);
+        if (status == 200) {
+            const jsonResp = await response.json();
+            return this.createUserFromJson(jsonResp.result);
+        } else {
             return null;
         }
-        
     }
 
     static buildRequest(userId) {
