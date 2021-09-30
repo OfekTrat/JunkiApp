@@ -1,4 +1,4 @@
-import GetFindingByRadius from '../api_communicators/finding_by_radius';
+import GetFindingByRadius from '../../api_communicators/finding_by_radius';
 import { StyleSheet, Text, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import React, { Component } from 'react';

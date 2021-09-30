@@ -3,7 +3,7 @@ import { TouchableOpacity, Alert, StyleSheet, View } from 'react-native';
 import React, { PureComponent } from 'react';
 import { captureButtonStyle, screenStyle } from './camera_styles';
 import { CameraPermissionOptions } from './camera_permission_options';
-import NavigationScreens from '../navigation_screens';
+import NavigationScreens from '../../navigation_screens';
 
 
 export default class CameraActivity extends PureComponent {
