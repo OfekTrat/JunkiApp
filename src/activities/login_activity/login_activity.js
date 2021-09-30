@@ -37,9 +37,6 @@ export default class LoginActivity extends React.Component {
         }
         
     }
-    navToMap = () => {
-        this.props.navigation.navigate(NavigationScreens.MAP);
-    }
 
     isUserExists(user) {
         return user != null;
