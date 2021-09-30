@@ -4,6 +4,7 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import React, { Component } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { style_map } from './map_styles';
+import NavigationScreens from '../../navigation_screens';
 
 
 
@@ -16,13 +17,14 @@ const defaultRegion = {
 
 export default class MapActivity extends Component {
     DEGREES_TO_KM = 111;
-    MAXIMUM_RADIUS = 10000;
+    MAXIMUM_RADIUS = 100;
 
     constructor(props) {
         super(props);
         this.state = {
             style: style_map.map,
-            visible_markers: <View/>
+            visible_markers: <View/>,
+            markers: []
         };
 
         this.onTouchablePress = this.navigateToCamera.bind(this);
@@ -41,8 +43,6 @@ export default class MapActivity extends Component {
         } else {
             this.setState({visible_markers: <View/>})
         }
-        
-        
     }
     generatePayloadByRegion = (region) => {
         return {
@@ -55,6 +55,7 @@ export default class MapActivity extends Component {
         return Math.ceil(Math.max(longitudeDelta, latitudeDelta) * this.DEGREES_TO_KM);
     }
     setVisibleMarkers = (json_data) => {
+        this.setState({markers: json_data});
         const visible_markers = <View>
             {
                 json_data &&
@@ -67,12 +68,45 @@ export default class MapActivity extends Component {
     }
     renderMarker(key, finding) {
         return (
-            <Marker key={key} coordinate={{longitude: finding.longitude, latitude: finding.latitude}}/>
+            <Marker 
+                key={key} 
+                coordinate={{longitude: finding.longitude, latitude: finding.latitude}}/>
         );
     }
 
     navigateToCamera = () => {
         this.props.navigation.navigate('camera');
+    }
+
+    onMarkerPress = (event) => {
+        const location = event.nativeEvent.coordinate;
+
+        if (this.state.markers == null) {
+            return;
+        }
+        
+        const finding = this.state.markers.find((finding) => {
+            if (finding != null) {
+                if (this.isSameLocation(finding, location)) {
+                    return finding;
+                }
+            }
+        });
+        
+        this.props.navigation.navigate(NavigationScreens.VIEW_FINDING, {finding: finding});
+    }
+    findFinding(finding, location) {
+        if (finding != null) {
+            if (this.isSameLocation(finding, location)) {
+                return;
+            }
+        }
+    }
+    isSameLocation(finding, location) {
+        return (
+            finding.longitude == location.longitude &&
+            finding.latitude == location.latitude
+        );
     }
 
     render() {
@@ -84,6 +118,7 @@ export default class MapActivity extends Component {
                     style={style_map.map}
                     initialRegion={this.initialRegion}
                     onRegionChangeComplete={this.onRegionChangeComplete}
+                    onMarkerPress={this.onMarkerPress}
                     >   
                     {this.state.visible_markers}
                 </MapView>
