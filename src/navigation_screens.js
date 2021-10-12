@@ -10,5 +10,6 @@ export default class NavigationScreens {
     static VIEW_IMAGE = 'view_image'; 
     static LOGIN = 'login';
     static REGISTER = 'register';
-    static POINT_CHOOSER = 'choose_point'
+    static POINT_CHOOSER = 'choose_point';
+    static VIEW_FINDING = 'view_finding';
 }
