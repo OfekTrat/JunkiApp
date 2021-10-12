@@ -12,6 +12,7 @@ import ChoosePointActivity from './src/activities/register_activity/choose_point
 import WaitActivity from './src/activities/wait_activity';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from './src/constants';
+import ViewFindingActivity from './src/activities/view_finding';
 
 
 const Stack = createNativeStackNavigator();
@@ -71,6 +72,7 @@ export default class App extends Component {
                         {props => <RegisterActivity {...props} signInCallback={this.signInCallback}/>}
                     </Stack.Screen>
                     <Stack.Screen name={NavigationScreens.POINT_CHOOSER} component={ChoosePointActivity}/>
+                    <Stack.Screen name={NavigationScreens.VIEW_FINDING} component={ViewFindingActivity}/>
                 </Stack.Navigator>
             </NavigationContainer>
         );
