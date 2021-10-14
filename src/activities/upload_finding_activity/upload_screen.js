@@ -7,7 +7,7 @@ import Location from "../../location";
 import RNFS from 'react-native-fs';
 import LocationHandler from "../../location_handler/location_handler";
 import TagsInfo from "../../api_communicators/tags_info";
-import FindingCommunicator from "../../api_communicators/finding_comm";
+import FindingCommunicator from "../../api_communicators/finding_communicator";
 
 
 export default class UploadScreen extends Component {

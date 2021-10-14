@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { style_map } from './map_styles';
 import NavigationScreens from '../../navigation_screens';
-import FindingCommunicator from '../../api_communicators/finding_comm';
+import FindingCommunicator from '../../api_communicators/finding_communicator';
 import Location from '../../location';
 
 
