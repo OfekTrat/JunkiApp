@@ -8,6 +8,10 @@ export default class UserStorage {
         await AsyncStorage.setItem(UserStorage.USER_KEY, JSON.stringify(user));
     }
     static async get_user() {
-        return await JSON.parse(AsyncStorage.getItem(UserStorage.USER_KEY));
+        return JSON.parse(await AsyncStorage.getItem(UserStorage.USER_KEY));
+    }
+
+    static async clear() {
+        await AsyncStorage.clear()
     }
 }

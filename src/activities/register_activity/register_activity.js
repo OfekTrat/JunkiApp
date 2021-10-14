@@ -40,7 +40,7 @@ export default class RegisterActivity extends React.Component {
             this.setLocation();
             const user = this.createUser();
             const result = await UserUploader.upload(user);
-            
+                
             if (result) {
                 Alert.alert("Successful Upload");
                 await UserStorage.set_user(user);

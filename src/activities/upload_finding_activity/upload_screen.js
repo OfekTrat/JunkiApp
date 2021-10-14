@@ -21,10 +21,6 @@ export default class UploadScreen extends Component {
         }
         this.image_data = props.route.params.image_data;
         this.possibleTags = TagsInfo.get();
-
-        this.onViewImagePress = this.onViewImagePress.bind(this);
-        this.onUploadPress = this.onUploadPress.bind(this);
-
         this.getLocation();
     }
 
@@ -32,7 +28,7 @@ export default class UploadScreen extends Component {
         this.props.navigation.navigate(NavigationScreens.MAP);
     }
 
-    onViewImagePress() {
+    onViewImagePress = () => {
         this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {uri: this.image_data.uri});
     }
     
