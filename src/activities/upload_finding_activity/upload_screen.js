@@ -4,10 +4,10 @@ import NavigationScreens from "../../navigation_screens";
 import PickerCheckBox from 'react-native-picker-checkbox';
 import Finding from "../../finding";
 import Location from "../../location";
-import UploadFinding from "../../api_communicators/upload_finding";
 import RNFS from 'react-native-fs';
 import LocationHandler from "../../location_handler/location_handler";
 import TagsInfo from "../../api_communicators/tags_info";
+import FindingCommunicator from "../../api_communicators/finding_communicator";
 
 
 export default class UploadScreen extends Component {
@@ -64,14 +64,14 @@ export default class UploadScreen extends Component {
         }
     }   
 
-    onUploadPress = () => {
+    onUploadPress = async () => {
         if (this.tags != null && this.image_data != null && this.location != null) {
             const timestamp = this.getCurrentTimestamp()
-            this.processImageData(this.image_data).then((image) => {
-                const finding = new Finding(timestamp, this.location, this.tags, image[0], image[1]);
-                UploadFinding.upload(finding);
-                this.navToMap();
-            })
+            const { image_hash, image_data } = await this.processImageData(this.image_data);
+            const finding = new Finding(timestamp, this.location, this.tags, image_hash);
+            const response = await FindingCommunicator.upload(finding);
+            console.log(response.status);
+            this.navToMap();
         } else {
             Alert.alert('You did not finish all the steps');
         }

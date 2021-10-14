@@ -1,10 +1,11 @@
-import GetFindingByRadius from '../../api_communicators/finding_by_radius';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import React, { Component } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { style_map } from './map_styles';
 import NavigationScreens from '../../navigation_screens';
+import FindingCommunicator from '../../api_communicators/finding_communicator';
+import Location from '../../location';
 
 
 
@@ -35,11 +36,20 @@ export default class MapActivity extends Component {
         return defaultRegion;
     }
 
-    onRegionChangeComplete = (region) => {
-        const payload = this.generatePayloadByRegion(region);
+    onRegionChangeComplete = async (region) => {
+        const radius = this.calcRadius(region.longitudeDelta, region.latitudeDelta);
+        const location = new Location(region.longitude, region.latitude);
 
-        if (payload.radius <= this.MAXIMUM_RADIUS) {
-            GetFindingByRadius.get(this.setVisibleMarkers, payload);
+        if (radius <= this.MAXIMUM_RADIUS) {
+            try {
+                const results = await FindingCommunicator.get_by_radius(radius, location)
+                const json_res = await results.json();
+                const findings = json_res["result"];
+                this.setVisibleMarkers(findings);
+            } catch (err) {
+                console.log(err.message);
+            }
+            
         } else {
             this.setState({visible_markers: <View/>})
         }

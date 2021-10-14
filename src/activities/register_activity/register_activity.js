@@ -2,12 +2,12 @@ import React from "react";
 import { TextInput, View, Button, Text, Alert } from "react-native";
 import PickerCheckbox from "react-native-picker-checkbox";
 import NavigationScreens from "../../navigation_screens";
-import UserUploader from "../../api_communicators/user_uploader";
 import User from "../../user";
 import { style } from "./register_style";
 import Location from '../../location';
 import TagsInfo from '../../api_communicators/tags_info';
 import UserStorage from "../../user_storage";
+import UserCommunicator from "../../api_communicators/user_communicator";
 
 
 export default class RegisterActivity extends React.Component {
@@ -39,15 +39,18 @@ export default class RegisterActivity extends React.Component {
         try {
             this.setLocation();
             const user = this.createUser();
-            const result = await UserUploader.upload(user);
+            const result = await UserCommunicator.upload(user);
+            const json_res = await result.json();
                 
-            if (result) {
-                Alert.alert("Successful Upload");
+            if (result.status == 200) {
+                Alert.alert(json_res["msg"]);
                 await UserStorage.set_user(user);
                 this.props.signInCallback();
                 this.props.navigation.navigate(NavigationScreens.MAP);  
+            } else if (result.status == 400) {
+                Alert.alert(json_res["error"]);
             } else {
-                Alert.alert("User already exists");
+                Alert.alert("Something went wrond")
             }
         } catch (err) {
             Alert.alert("Something Went Wrong:\n" + err.message);
