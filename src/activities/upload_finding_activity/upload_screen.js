@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Button, PermissionsAndroid, Modal, Text, CheckBox, Alert, } from "react-native";
+import { View, Button, Modal, Text, Alert } from "react-native";
 import NavigationScreens from "../../navigation_screens";
 import PickerCheckBox from 'react-native-picker-checkbox';
 import Finding from "../../finding";
@@ -8,6 +8,8 @@ import RNFS from 'react-native-fs';
 import LocationHandler from "../../location_handler/location_handler";
 import TagsInfo from "../../api_communicators/tags_info";
 import FindingCommunicator from "../../api_communicators/finding_communicator";
+import Image from '../../image';
+import ImageCommunicator from "../../api_communicators/image_communicator";
 
 
 export default class UploadScreen extends Component {
@@ -28,8 +30,9 @@ export default class UploadScreen extends Component {
         this.props.navigation.navigate(NavigationScreens.MAP);
     }
 
-    onViewImagePress = () => {
-        this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {uri: this.image_data.uri});
+    onViewImagePress = async () => {
+        const imageData = await RNFS.readFile(this.image_data.uri, 'base64');
+        this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {image_data: imageData});
     }
     
     getLocation = async () => {
@@ -67,10 +70,10 @@ export default class UploadScreen extends Component {
     onUploadPress = async () => {
         if (this.tags != null && this.image_data != null && this.location != null) {
             const timestamp = this.getCurrentTimestamp()
-            const { image_hash, image_data } = await this.processImageData(this.image_data);
-            const finding = new Finding(timestamp, this.location, this.tags, image_hash);
+            const image = await this.processImageData(this.image_data);
+            const finding = new Finding(timestamp, this.location, this.tags, image.hash);
             const response = await FindingCommunicator.upload(finding);
-            console.log(response.status);
+            await ImageCommunicator.upload(image);
             this.navToMap();
         } else {
             Alert.alert('You did not finish all the steps');
@@ -79,19 +82,19 @@ export default class UploadScreen extends Component {
     getCurrentTimestamp() {
         return Math.floor(Date.now())
     }
-    async processImageData(image_data) {
-        const splittedPath = image_data.uri.split("/");
+    async processImageData(image_info) {
+        const splittedPath = image_info.uri.split("/");
         const imageHash = splittedPath[splittedPath.length - 1].split(".")[0];
-        const imageB64 = await RNFS.readFile(image_data.uri, 'base64');
-
-        return [imageHash, imageB64];
+        const imageData = await RNFS.readFile(image_info.uri, "base64");
+        const imageJson = { hash: imageHash, data: imageData };
+        const image = Image.fromJson(imageJson);    
+        return image;
     }
 
     render() {
         return (
             <View>
                 <Button title="View Image" onPress={this.onViewImagePress}/>
-                {/* <Button title="Get Location" onPress={this.onGetLocationPress}/> */}
                 {this.renderTagsPicker()}
                 <Button title="Upload" onPress={this.onUploadPress}/>
 

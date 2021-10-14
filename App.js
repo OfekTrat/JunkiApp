@@ -10,7 +10,6 @@ import LoginActivity from './src/activities/login_activity/login_activity';
 import RegisterActivity from './src/activities/register_activity/register_activity';
 import ChoosePointActivity from './src/activities/register_activity/choose_point_activity';
 import WaitActivity from './src/activities/wait_activity';
-import ViewFindingActivity from './src/activities/view_finding';
 import UserStorage from './src/user_storage';
 
 
@@ -71,7 +70,6 @@ export default class App extends Component {
                         {props => <RegisterActivity {...props} signInCallback={this.signInCallback}/>}
                     </Stack.Screen>
                     <Stack.Screen name={NavigationScreens.POINT_CHOOSER} component={ChoosePointActivity}/>
-                    <Stack.Screen name={NavigationScreens.VIEW_FINDING} component={ViewFindingActivity}/>
                 </Stack.Navigator>
             </NavigationContainer>
         );

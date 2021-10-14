@@ -6,6 +6,8 @@ import { style_map } from './map_styles';
 import NavigationScreens from '../../navigation_screens';
 import FindingCommunicator from '../../api_communicators/finding_communicator';
 import Location from '../../location';
+import ImageCommunicator from '../../api_communicators/image_communicator';
+import RNFS from 'react-native-fs';
 
 
 
@@ -19,6 +21,7 @@ const defaultRegion = {
 export default class MapActivity extends Component {
     DEGREES_TO_KM = 111;
     MAXIMUM_RADIUS = 100;
+    TMP_FILE = RNFS.DocumentDirectoryPath + "/tmp";
 
     constructor(props) {
         super(props);
@@ -88,7 +91,7 @@ export default class MapActivity extends Component {
         this.props.navigation.navigate('camera');
     }
 
-    onMarkerPress = (event) => {
+    onMarkerPress = async (event) => {
         const location = event.nativeEvent.coordinate;
 
         if (this.state.markers == null) {
@@ -102,8 +105,9 @@ export default class MapActivity extends Component {
                 }
             }
         });
-        
-        this.props.navigation.navigate(NavigationScreens.VIEW_FINDING, {finding: finding});
+        const image = await ImageCommunicator.get(finding.image_hash);
+
+        this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {image_data: image.toJson().data});
     }
     findFinding(finding, location) {
         if (finding != null) {
