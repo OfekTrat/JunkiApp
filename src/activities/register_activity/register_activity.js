@@ -39,21 +39,13 @@ export default class RegisterActivity extends React.Component {
         try {
             this.setLocation();
             const user = this.createUser();
-            const result = await UserCommunicator.upload(user);
-            const json_res = await result.json();
-                
-            if (result.status == 200) {
-                Alert.alert(json_res["msg"]);
-                await UserStorage.set_user(user);
-                this.props.signInCallback();
-                this.props.navigation.navigate(NavigationScreens.MAP);  
-            } else if (result.status == 400) {
-                Alert.alert(json_res["error"]);
-            } else {
-                Alert.alert("Something went wrond")
-            }
+            await UserCommunicator.upload(user);
+            await UserStorage.set_user(user);
+            Alert.alert("Successfuly uploaded");
+            this.props.signInCallback();
+            this.props.navigation.navigate(NavigationScreens.MAP);
         } catch (err) {
-            Alert.alert("Something Went Wrong:\n" + err.message);
+            Alert.alert(err.message);
         }
     }
     setLocation = async () => {
@@ -65,7 +57,7 @@ export default class RegisterActivity extends React.Component {
     }
         
     createUser = () => {
-        return new User(this.uid, 0, this.state.location, 
+        return new User(this.uid, Math.floor(Date.now()), this.state.location, 
                         this.state.radiusInput, this.state.tags);
     }
 
