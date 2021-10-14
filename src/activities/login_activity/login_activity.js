@@ -2,7 +2,6 @@ import React from "react";
 import { Button, View, TextInput, Alert } from "react-native";
 import { style } from "./login_style";
 import GoogleSigninWrapper from './signin_options/google_signin';
-import RegularSignin from "./signin_options/regular_signin";
 import NavigationScreens from '../../navigation_screens';
 import UserCreator from "./user_creator";
 import SignInOptionChooser from "./signin_options/option_chooser";
@@ -42,9 +41,14 @@ export default class LoginActivity extends React.Component {
         }
     }
     createUser = async () => {
-        const user = await UserCreator.create(this.state.email, this.state.password)
-        const uid = user.user.uid;
-        this.gotoRegisterActivity(uid);
+        try {
+            const user = await UserCreator.create(this.state.email, this.state.password)
+            const uid = user.user.uid;
+            this.gotoRegisterActivity(uid);
+        } catch (err) {
+            Alert.alert(err.message);
+        }
+            
     }
     gotoRegisterActivity = (uid) => {
         this.props.navigation.navigate(NavigationScreens.REGISTER, { uid: uid });
