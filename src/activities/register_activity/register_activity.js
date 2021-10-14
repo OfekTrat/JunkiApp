@@ -1,13 +1,13 @@
 import React from "react";
 import { TextInput, View, Button, Text, Alert } from "react-native";
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import Constants from "../../constants";
 import PickerCheckbox from "react-native-picker-checkbox";
 import NavigationScreens from "../../navigation_screens";
 import UserUploader from "../../api_communicators/user_uploader";
 import User from "../../user";
 import { style } from "./register_style";
 import Location from '../../location';
+import TagsInfo from '../../api_communicators/tags_info';
+import UserStorage from "../../user_storage";
 
 
 export default class RegisterActivity extends React.Component {
@@ -23,19 +23,7 @@ export default class RegisterActivity extends React.Component {
             tags: []
         }
 
-        this.possibleTags = this.getPossibleTags();
-        const { getItem, setItem } = useAsyncStorage(Constants.USER_LOCAL_STORAGE);
-        this.getItem = getItem;
-        this.setItem = setItem;
-    }
-
-    getPossibleTags() {
-        return [
-            {key: 1, tag: "Electrical"}, 
-            {key: 2, tag: "Music"},
-            {key: 3, tag: "Furniture"}, 
-            {key: 4, tag: "Wood"}
-        ];
+        this.possibleTags = TagsInfo.get();
     }
 
     onRadiusChange = (radius) => {
@@ -48,14 +36,14 @@ export default class RegisterActivity extends React.Component {
     }
 
     register = async () => {
-        this.setLocation();
-        const user = this.createUser();
         try {
+            this.setLocation();
+            const user = this.createUser();
             const result = await UserUploader.upload(user);
-            
+                
             if (result) {
                 Alert.alert("Successful Upload");
-                await this.setItem(JSON.stringify(user));
+                await UserStorage.set_user(user);
                 this.props.signInCallback();
                 this.props.navigation.navigate(NavigationScreens.MAP);  
             } else {

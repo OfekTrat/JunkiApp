@@ -10,9 +10,8 @@ import LoginActivity from './src/activities/login_activity/login_activity';
 import RegisterActivity from './src/activities/register_activity/register_activity';
 import ChoosePointActivity from './src/activities/register_activity/choose_point_activity';
 import WaitActivity from './src/activities/wait_activity';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from './src/constants';
 import ViewFindingActivity from './src/activities/view_finding';
+import UserStorage from './src/user_storage';
 
 
 const Stack = createNativeStackNavigator();
@@ -30,13 +29,13 @@ export default class App extends Component {
     }
 
     async setSigned() {
-        await AsyncStorage.clear(); // needs to be removed
-        const user = await AsyncStorage.getItem(Constants.USER_LOCAL_STORAGE);
+        await UserStorage.clear() // This row should be deleted and the method should be deleted.
+        const user = await UserStorage.get_user();
 
         if (user == null) {
-            this.setState({ isSigned: false, isLoading: false});
+            await this.setState({ isSigned: false, isLoading: false});
         } else {
-            this.setState({ isSigned: true, isLoading: false });
+            await this.setState({ isSigned: true, isLoading: false });
         }        
     }
 

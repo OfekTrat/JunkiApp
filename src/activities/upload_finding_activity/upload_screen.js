@@ -7,6 +7,7 @@ import Location from "../../location";
 import UploadFinding from "../../api_communicators/upload_finding";
 import RNFS from 'react-native-fs';
 import LocationHandler from "../../location_handler/location_handler";
+import TagsInfo from "../../api_communicators/tags_info";
 
 
 export default class UploadScreen extends Component {
@@ -19,11 +20,7 @@ export default class UploadScreen extends Component {
             tagPopupVisible: false
         }
         this.image_data = props.route.params.image_data;
-        this.possibleTags = this.getPossibleTags();
-
-        this.onViewImagePress = this.onViewImagePress.bind(this);
-        this.onUploadPress = this.onUploadPress.bind(this);
-
+        this.possibleTags = TagsInfo.get();
         this.getLocation();
     }
 
@@ -31,16 +28,7 @@ export default class UploadScreen extends Component {
         this.props.navigation.navigate(NavigationScreens.MAP);
     }
 
-    getPossibleTags() {
-        return [
-            {key: 1, tag: "Electrical"}, 
-            {key: 2, tag: "Music"},
-            {key: 3, tag: "Furniture"}, 
-            {key: 4, tag: "Wood"}
-        ];
-    }
-
-    onViewImagePress() {
+    onViewImagePress = () => {
         this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {uri: this.image_data.uri});
     }
     
