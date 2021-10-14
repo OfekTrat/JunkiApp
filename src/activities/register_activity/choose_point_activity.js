@@ -1,7 +1,7 @@
 import React from "react";
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import { style_map } from '../map_activity/map_styles';
-import { View, Button } from 'react-native';
+import { View, Button, Alert } from 'react-native';
 import NavigationScreens from "../../navigation_screens";
 import Location from "../../location";
 
@@ -23,6 +23,7 @@ export default class ChoosePointActivity extends React.Component {
         };
         this.initialRegion = defaultRegion
         this.chooseCallback = this.props.callback;
+        Alert.alert("Tap Point to Follow Location");
     }
 
     onRegionChange = (region) => {

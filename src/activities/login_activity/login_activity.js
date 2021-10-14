@@ -1,10 +1,11 @@
 import React from "react";
-import AsyncStorage, { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import Constants from "../../constants";
-import NavigationScreens from "../../navigation_screens";
 import { Button, View, TextInput, Alert } from "react-native";
-import UserGetter from "../../api_communicators/user_getter";
 import { style } from "./login_style";
+import GoogleSigninWrapper from './signin_options/google_signin';
+import RegularSignin from "./signin_options/regular_signin";
+import NavigationScreens from '../../navigation_screens';
+import UserCreator from "./user_creator";
+import SignInOptionChooser from "./signin_options/option_chooser";
 
 
 export default class LoginActivity extends React.Component {
@@ -13,52 +14,64 @@ export default class LoginActivity extends React.Component {
 
     constructor(props) {
         super(props);
-        const { getItem, setItem } = useAsyncStorage(Constants.USER_LOCAL_STORAGE);
-        this.getItem = getItem;
-        this.setItem = setItem;
         this.state = {
-            inputText: ''
+            email: '',
+            password: ''
         }
+        GoogleSigninWrapper.configure();
     }
 
-    onLoginPress = async () => {
+    onButtonPress = async (platform) => {
         try {
-            const user = await UserGetter.get(this.state.inputText)
+            const user = await SignInOptionChooser.choose(platform, this.state.email, this.state.password);
+            const newUser = user.additionalUserInfo.isNewUser;
+            const uid = user.user.uid;
 
-            if (this.isUserExists(user)) {
-                await this.setItem(user.id);
+            if (!newUser) {
                 this.props.signInCallback();
             } else {
-                Alert.alert("User does not exist");
+                this.gotoRegisterActivity(uid);
             }
-        } catch(error) {
-            console.log(error.message);
-            Alert.alert(error.message);
+        } catch (err) {
+            if (err.message == "Empty Credentials"){
+                Alert.alert("You did not enter credentials");
+            } else {
+                this.createUser();
+            }
+            
         }
-        
+    }
+    createUser = async () => {
+        const user = await UserCreator.create(this.state.email, this.state.password)
+        const uid = user.user.uid;
+        this.gotoRegisterActivity(uid);
+    }
+    gotoRegisterActivity = (uid) => {
+        this.props.navigation.navigate(NavigationScreens.REGISTER, { uid: uid });
     }
 
-    isUserExists(user) {
-        return user != null;
+    emailChange = (email) => {
+        this.setState({email: email});
     }
-
-    changeText = (text) => {
-        this.setState({inputText: text});
-    }
-    onRegisterPress = () => {
-        this.props.navigation.navigate(NavigationScreens.REGISTER);
+    passwordChange = (password) => {
+        this.setState({password: password});
     }
 
     render()  {
         return (
             <View
                 style={style.containerStyle}>
-                <TextInput 
-                    placeholder="Enter User Here"
-                    onChangeText={this.changeText}
-                    style={style.inputTextStyle}/>
-                <Button title={this.LOGIN_TITLE} onPress={this.onLoginPress}/>
-                <Button title={this.REGISTER_TITLE} onPress={this.onRegisterPress}/>
+                <TextInput
+                    style={style.TextInput}
+                    placeholder="Enter email here"
+                    onChangeText={this.emailChange}/>
+                <TextInput
+                    style={style.TextInput}
+                    placeholder="Enter password here"
+                    onChangeText={this.passwordChange}/>
+                
+                <Button title="Login with Credentials" onPress={() => this.onButtonPress("regular")}/>
+                <Button title="Login with Google" onPress={() => this.onButtonPress("google")}/>
             </View>
         );
     }
