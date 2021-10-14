@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { TextInput, View, Button, Text, Alert } from "react-native";
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import Constants from "../../constants";
@@ -10,23 +10,20 @@ import { style } from "./register_style";
 import Location from '../../location';
 
 
-
 export default class RegisterActivity extends React.Component {
     BUTTON_CHOOSE_POINT_TITLE = "Press to choose Coordinate";
     REGISTER_TITLE = "Register";
 
     constructor(props) {
         super(props);
-
+        this.uid = this.props.route.params.uid;
         this.state = {
-            userIdInput: "",
             radiusInput: 0,
             location: new Location(0, 0),
             tags: []
         }
 
         this.possibleTags = this.getPossibleTags();
-
         const { getItem, setItem } = useAsyncStorage(Constants.USER_LOCAL_STORAGE);
         this.getItem = getItem;
         this.setItem = setItem;
@@ -41,9 +38,6 @@ export default class RegisterActivity extends React.Component {
         ];
     }
 
-    onUserIdChange = (text) => {
-        this.setState({userIdInput: text});
-    }
     onRadiusChange = (radius) => {
         if (radius == "") {
             this.setState({radiusInput: 0});
@@ -54,39 +48,33 @@ export default class RegisterActivity extends React.Component {
     }
 
     register = async () => {
-        this.setState({ location: this.getLocation() });
-
-        if (this.isRadiusValid(this.state.radiusInput)) {
-            const user = this.createUser();
+        this.setLocation();
+        const user = this.createUser();
+        try {
             const result = await UserUploader.upload(user);
-
+            
             if (result) {
                 Alert.alert("Successful Upload");
-                await this.setItem(user.id);
-                console.log(this.props.signInCallback);
+                await this.setItem(JSON.stringify(user));
                 this.props.signInCallback();
                 this.props.navigation.navigate(NavigationScreens.MAP);  
             } else {
                 Alert.alert("User already exists");
             }
-        } else {
-            Alert.alert('radius is not good');
+        } catch (err) {
+            Alert.alert("Something Went Wrong:\n" + err.message);
         }
     }
-    getLocation = () => {
+    setLocation = async () => {
         if (this.props.route.params != null) {
-            return this.props.route.params.location;
-        } else {
-            this.setState({radiusInput: 0});
-            return this.state.location;
+            if (this.props.route.params.location != null) {
+                await this.setState({ location: this.props.route.params.location});
+            }
         }
+    }
         
-    }
-    isRadiusValid(radius) {
-        return !isNaN(radius);
-    }
     createUser = () => {
-        return new User(this.state.userIdInput, 0, this.state.location, 
+        return new User(this.uid, 0, this.state.location, 
                         this.state.radiusInput, this.state.tags);
     }
 
@@ -116,21 +104,14 @@ export default class RegisterActivity extends React.Component {
         this.props.navigation.navigate(NavigationScreens.POINT_CHOOSER);
     }
 
-    renderUserIdInput() {
-        return (
-            <TextInput
-                placeholder="Enter user here"
-                onChangeText={this.onUserIdChange}
-                style={style.textInput}/>
-        );
-    }
-
     renderRadiusInput() {
         return (
             <TextInput
                 onChangeText={this.onRadiusChange}
                 placeholder="Enter radius here"
-                style={style.textInput}/>
+                style={style.textInput}
+                keyboardType='numeric'
+                maxLength={2}/>
         );
     }
 
@@ -141,7 +122,6 @@ export default class RegisterActivity extends React.Component {
     render() {
         return (
             <View>
-                {this.renderUserIdInput()}
                 {this.renderRadiusInput()}
                 {this.renderTagsPicker()}
                 {this.renderButton(this.BUTTON_CHOOSE_POINT_TITLE, this.onMapPress)}
