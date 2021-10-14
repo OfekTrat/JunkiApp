@@ -72,7 +72,7 @@ export default class UploadScreen extends Component {
             const timestamp = this.getCurrentTimestamp()
             const image = await this.processImageData(this.image_data);
             const finding = new Finding(timestamp, this.location, this.tags, image.hash);
-            const response = await FindingCommunicator.upload(finding);
+            await FindingCommunicator.upload(finding);
             await ImageCommunicator.upload(image);
             this.navToMap();
         } else {

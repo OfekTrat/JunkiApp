@@ -45,9 +45,7 @@ export default class MapActivity extends Component {
 
         if (radius <= this.MAXIMUM_RADIUS) {
             try {
-                const results = await FindingCommunicator.get_by_radius(radius, location)
-                const json_res = await results.json();
-                const findings = json_res["result"];
+                const findings = await FindingCommunicator.get_by_radius(radius, location)
                 this.setVisibleMarkers(findings);
             } catch (err) {
                 console.log(err.message);

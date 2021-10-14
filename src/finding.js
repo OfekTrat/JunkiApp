@@ -2,7 +2,7 @@
 
 
 export default class Finding {
-    constructor(id, location, tags, image_hash, image) {
+    constructor(id, location, tags, image_hash) {
         this.id = id;
         this.location = location;
         this.tags = tags;
@@ -17,5 +17,14 @@ export default class Finding {
             tags: this.tags,
             image_hash: this.image_hash
         };
+    }
+
+    fromJson(findingJson) {
+        return new Finding(
+            findingJson.id, 
+            new Location(findingJson.longitude, findingJson.latitude),
+            findingJson.tags,
+            findingJson.image_hash
+        );
     }
 }
