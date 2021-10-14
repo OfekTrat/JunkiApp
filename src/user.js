@@ -21,4 +21,14 @@ export default class User {
             tags: this.tags
         };
     }
+
+    fromJson(userJson) {
+        return new User(
+            fromJson.id,
+            fromJson.lastNotified,
+            new Location(fromJson.longitude, fromJson.latitude),
+            fromJson.radius,
+            fromJson.tags
+        );
+    }
 }
