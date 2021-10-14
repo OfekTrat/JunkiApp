@@ -29,7 +29,7 @@ export default class App extends Component {
     }
 
     async setSigned() {
-        await UserStorage.clear() // This row should be deleted and the method should be deleted.
+        // await UserStorage.clear() // This row should be deleted and the method should be deleted.
         const user = await UserStorage.get_user();
 
         if (user == null) {
