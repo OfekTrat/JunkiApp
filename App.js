@@ -30,7 +30,7 @@ export default class App extends Component {
     }
 
     async setSigned() {
-        await AsyncStorage.clear();
+        await AsyncStorage.clear(); // needs to be removed
         const user = await AsyncStorage.getItem(Constants.USER_LOCAL_STORAGE);
 
         if (user == null) {
