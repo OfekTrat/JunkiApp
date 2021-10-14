@@ -13,14 +13,19 @@ const styles = StyleSheet.create({
 export default class ViewImageActivity extends Component {
     constructor(props) {
         super(props);
-        this.uri = props.route.params.uri;
+        this.image_data = props.route.params.image_data;
     }
+
+    getImageData = () => {
+        return "data:image/jpg;base64," + this.image_data;
+    }
+
     render() {
         return (
             <View>
                 <Image
                     style={styles.stretch}
-                    source={{uri: this.uri}}/>
+                    source={{uri: this.getImageData()}}/>
             </View>
         )
     }
