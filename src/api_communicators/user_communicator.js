@@ -41,4 +41,18 @@ export default class UserCommunicator {
             throw new Error("Something went wrong");
         }
     }
+
+    static async _delete(userId) {
+        const request = RequestBuilder.build("DELETE", this.URI.concat("/", userId), null);
+        const result = await fetch(request);
+
+        if (result.status == 200) {
+
+        } else if (result.status == 404) {
+            throw new UserNotFoundError()
+        } else {
+            console.log(result)
+            throw new Error("Something went wrong");
+        }
+    }
 }
