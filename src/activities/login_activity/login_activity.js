@@ -7,6 +7,7 @@ import UserCreator from "./user_creator";
 import SignInOptionChooser from "./signin_options/option_chooser";
 import UserCommunicator from '../../api_communicators/user_communicator';
 import { UserNotFoundError } from '../../errors/user_errors';
+import UserStorage from '../../user_storage';
 
 
 export default class LoginActivity extends React.Component {
@@ -30,7 +31,6 @@ export default class LoginActivity extends React.Component {
 
             if (!newUser) {
                 this.handleNotNewUser(uid);
-                // this.props.signInCallback();
             } else {
                 this.gotoRegisterActivity(uid);
             }
@@ -46,11 +46,13 @@ export default class LoginActivity extends React.Component {
     handleNotNewUser = async (uid) => {
         try {
             const user = await UserCommunicator.get(uid);
+            await UserStorage.set_user(user)
             this.props.signInCallback();
         } catch (err) {
             if (err instanceof UserNotFoundError) {
                 this.gotoRegisterActivity(uid);
             } else {
+                console.log(err.message);
                 Alert.alert("Something went wrong with your user");
             }
         }
