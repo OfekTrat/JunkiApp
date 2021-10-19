@@ -1,5 +1,4 @@
-
-
+import Location from './location';
 
 
 export default class User {
@@ -22,13 +21,13 @@ export default class User {
         };
     }
 
-    fromJson(userJson) {
+    static fromJson(userJson) {
         return new User(
-            fromJson.id,
-            fromJson.lastNotified,
-            new Location(fromJson.longitude, fromJson.latitude),
-            fromJson.radius,
-            fromJson.tags
+            userJson.id,
+            userJson.lastNotified,
+            new Location(userJson.longitude, userJson.latitude),
+            userJson.radius,
+            userJson.tags
         );
     }
 }
