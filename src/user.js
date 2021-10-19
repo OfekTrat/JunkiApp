@@ -1,3 +1,4 @@
+import { BadUserJsonError } from './errors/user_errors';
 import Location from './location';
 
 
@@ -22,12 +23,21 @@ export default class User {
     }
 
     static fromJson(userJson) {
-        return new User(
-            userJson.id,
-            userJson.lastNotified,
-            new Location(userJson.longitude, userJson.latitude),
-            userJson.radius,
-            userJson.tags
-        );
+        if (this._validateJson(userJson)) {
+            return new User(
+                userJson.id,
+                userJson.last_notified,
+                new Location(userJson.longitude, userJson.latitude),
+                userJson.radius,
+                userJson.tags
+            );
+        } else {
+            throw new BadUserJsonError();
+        }  
+    }
+    static _validateJson(userJson) {
+        return ("id" in userJson) & ("last_notified" in userJson) & ("longitude" in userJson) & 
+                ("latitude" in userJson) & ("radius" in userJson) & ("tags" in userJson);
+
     }
 }
