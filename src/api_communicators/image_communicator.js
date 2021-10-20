@@ -1,7 +1,7 @@
 import RequestBuilder from "./request_builder";
 import Image from '../image';
 import { ImageAlreadyExistsError, ImageNotFoundError } from "../errors/image_errors";
-
+import { fetch } from 'cross-fetch';
 
 
 export default class ImageCommunicator {
@@ -30,6 +30,16 @@ export default class ImageCommunicator {
             throw new ImageAlreadyExistsError("Image already exists somehow");
         } else if (result.status == 400) {
             throw new Error("Something Went Wrong");
+        }
+    }
+
+    static async delete(imageHash) {
+        const payload = { hashes: [imageHash]};
+        const request = RequestBuilder.build("DELETE", this.URI, payload);
+        const result = await fetch(request);
+        
+        if (result.status != 200) {
+            throw new Error("Something went wrong");
         }
     }
 }
