@@ -29,13 +29,14 @@ export default class App extends Component {
 
     async setSigned() {
         await UserStorage.clear() // This row should be deleted and the method should be deleted.
-        const user = await UserStorage.get_user();
-
-        if (user == null) {
-            await this.setState({ isSigned: false, isLoading: false});
-        } else {
+        try {
+            const user = await UserStorage.get_user();
             await this.setState({ isSigned: true, isLoading: false });
-        }        
+        } catch (err) {
+            if (err instanceof TypeError) {
+                await this.setState({ isSigned: false, isLoading: false});
+            }
+        }
     }
 
     signInCallback = () => {
