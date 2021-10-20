@@ -107,13 +107,6 @@ export default class MapActivity extends Component {
 
         this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {image_data: image.toJson().data});
     }
-    findFinding(finding, location) {
-        if (finding != null) {
-            if (this.isSameLocation(finding, location)) {
-                return;
-            }
-        }
-    }
     isSameLocation(finding, location) {
         return (
             finding.longitude == location.longitude &&
