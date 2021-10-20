@@ -31,3 +31,14 @@ test("Get User", async () => {
 
     await AsyncStorage.clear();
 });
+
+test("Get User when no user is set", async () => {
+    await AsyncStorage.clear();
+
+    try {
+        const user = await UserStorage.get_user();
+        expect(1).toBe(2);
+    } catch (err) {
+        expect(err).toBeInstanceOf(TypeError);
+    }
+})
