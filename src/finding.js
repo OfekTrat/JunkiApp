@@ -1,4 +1,5 @@
-
+import { BadFindingJsonError } from "./errors/finding_errors";
+import Location from "./location";
 
 
 export default class Finding {
@@ -19,12 +20,21 @@ export default class Finding {
         };
     }
 
-    fromJson(findingJson) {
-        return new Finding(
-            findingJson.id, 
-            new Location(findingJson.longitude, findingJson.latitude),
-            findingJson.tags,
-            findingJson.image_hash
-        );
+    static fromJson(findingJson) {
+        if (this._validateJson(findingJson)) {
+            return new Finding(
+                findingJson.id, 
+                new Location(findingJson.longitude, findingJson.latitude),
+                findingJson.tags,
+                findingJson.image_hash
+            );
+        } else {
+            throw new BadFindingJsonError();
+        }
+        
+    }
+    static _validateJson(findingJson) {
+        return ("id" in findingJson) & ("longitude" in findingJson) & ("latitude" in findingJson) &
+                ("tags" in findingJson) & ("image_hash" in findingJson);
     }
 }
