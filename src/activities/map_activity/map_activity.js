@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import React, { Component } from 'react';
 import { TouchableOpacity } from 'react-native';
@@ -8,7 +8,7 @@ import FindingCommunicator from '../../api_communicators/finding_communicator';
 import Location from '../../location';
 import ImageCommunicator from '../../api_communicators/image_communicator';
 import RNFS from 'react-native-fs';
-
+import TagPicker from '../../tag_picker';
 
 
 const defaultRegion = {
@@ -28,7 +28,8 @@ export default class MapActivity extends Component {
         this.state = {
             style: style_map.map,
             visible_markers: <View/>,
-            markers: []
+            tags: [],
+            findings: []
         };
 
         this.onTouchablePress = this.navigateToCamera.bind(this);
@@ -40,43 +41,56 @@ export default class MapActivity extends Component {
     }
 
     onRegionChangeComplete = async (region) => {
-        const radius = this.calcRadius(region.longitudeDelta, region.latitudeDelta);
-        const location = new Location(region.longitude, region.latitude);
+        try {
+            const radius = this.calcRadius(region.longitudeDelta, region.latitudeDelta);
+            const location = new Location(region.longitude, region.latitude);
 
-        if (radius <= this.MAXIMUM_RADIUS) {
-            try {
+            if (radius <= this.MAXIMUM_RADIUS) {
                 const findings = await FindingCommunicator.get_by_radius(radius, location)
-                this.setVisibleMarkers(findings);
-            } catch (err) {
-                console.log(err.message);
+                this.setState({ findings: findings });
+                this.setVisibleMarkers();
+            } else {
+                this.setState({visible_markers: <View/>})
             }
-            
-        } else {
-            this.setState({visible_markers: <View/>})
+        } catch (err) {
+            Alert.alert(err.message);
         }
-    }
-    generatePayloadByRegion = (region) => {
-        return {
-            longitude: region.longitude,
-            latitude: region.latitude,
-            radius: this.calcRadius(region.longitudeDelta, region.latitudeDelta)
-        };
     }
     calcRadius(longitudeDelta, latitudeDelta) {
         return Math.ceil(Math.max(longitudeDelta, latitudeDelta) * this.DEGREES_TO_KM);
     }
-    setVisibleMarkers = (json_data) => {
-        this.setState({markers: json_data});
-        const visible_markers = <View>
-            {
-                json_data &&
-                json_data.map((finding, index) => (
-                    this.renderMarker(index, finding)
-                ))
-            }
-        </View>
+
+    setTags = async (tags) => {
+        await this.setState({ tags: tags });
+        this.setVisibleMarkers();
+    }
+
+    setVisibleMarkers = () => {
+        const filteredMarkersByTags = this.filterByTags(this.state.findings);
+        const visible_markers = <View>{ filteredMarkersByTags }</View>
         this.setState({ visible_markers });
     }
+
+    filterByTags = (findings) => {
+        const markers = [];
+
+        if (findings) {
+            for (let i = 0; i < findings.length; i ++) {
+                let finding = findings[i];
+                
+                if (this.state.tags.length > 0) {
+                    let intersection = finding.tags.filter(tag => this.state.tags.includes(tag));    
+                    if (intersection.length > 0) {
+                        markers.push(this.renderMarker(i, finding));
+                    }
+                } else {
+                    markers.push(this.renderMarker(i, finding));
+                }
+            }
+        }
+        return markers;
+    }
+
     renderMarker(key, finding) {
         return (
             <Marker 
@@ -91,28 +105,13 @@ export default class MapActivity extends Component {
 
     onMarkerPress = async (event) => {
         const location = event.nativeEvent.coordinate;
-
-        if (this.state.markers == null) {
-            return;
-        }
-        
-        const finding = this.state.markers.find((finding) => {
-            if (finding != null) {
-                if (this.isSameLocation(finding, location)) {
-                    return finding;
-                }
+        const finding = this.state.findings.find((finding) => {
+            if (this.isSameLocation(finding, location)) {
+                return finding;
             }
         });
         const image = await ImageCommunicator.get(finding.image_hash);
-
         this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {image_data: image.toJson().data});
-    }
-    findFinding(finding, location) {
-        if (finding != null) {
-            if (this.isSameLocation(finding, location)) {
-                return;
-            }
-        }
     }
     isSameLocation(finding, location) {
         return (
@@ -134,6 +133,11 @@ export default class MapActivity extends Component {
                     >   
                     {this.state.visible_markers}
                 </MapView>
+                <View
+                    style={style_map.searchTags}>
+                    <TagPicker 
+                        setChosenTags={this.setTags}/>
+                </View>
                 <View
                     style={style_map.buttonView} >
                      <TouchableOpacity

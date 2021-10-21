@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { View, Button, Modal, Text, Alert } from "react-native";
 import NavigationScreens from "../../navigation_screens";
-import PickerCheckBox from 'react-native-picker-checkbox';
 import Finding from "../../finding";
 import Location from "../../location";
 import RNFS from 'react-native-fs';
@@ -10,6 +9,7 @@ import TagsInfo from "../../api_communicators/tags_info";
 import FindingCommunicator from "../../api_communicators/finding_communicator";
 import Image from '../../image';
 import ImageCommunicator from "../../api_communicators/image_communicator";
+import TagPicker from "../../tag_picker";
 
 
 export default class UploadScreen extends Component {
@@ -22,7 +22,6 @@ export default class UploadScreen extends Component {
             tagPopupVisible: false
         }
         this.image_data = props.route.params.image_data;
-        this.possibleTags = TagsInfo.get();
         this.getLocation();
     }
 
@@ -49,22 +48,11 @@ export default class UploadScreen extends Component {
 
     renderTagsPicker = () => {
         return (
-            <PickerCheckBox
-                data={this.possibleTags}
-                headerComponent={<Text>Tags</Text>}
-                OnConfirm={this.setTags}
-                ConfirmButtonTitle="OK"
-                DescriptionField="tag"
-                KeyField="key"
-                placeholder="Select Some Tags"/>
+            <TagPicker setChosenTags={this.setTags}/>
         )
     }
     setTags = (tags) => {
-        this.tags = [];
-
-        for (let i = 0; i < tags.length; i++) {
-            this.tags.push(tags[i].tag);
-        }
+        this.tags = tags;
     }   
 
     onUploadPress = async () => {

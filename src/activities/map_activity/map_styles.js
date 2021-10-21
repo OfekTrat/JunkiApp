@@ -25,5 +25,11 @@ export const style_map = StyleSheet.create({
         fontSize: 25, 
         textAlign: 'center', 
         color: "white"
+    },
+    searchTags: {
+        position: 'absolute',
+        borderWidth: 1,
+        backgroundColor: 'white',
+        width: '100%'
     }
 });
