@@ -4,12 +4,11 @@ import NavigationScreens from "../../navigation_screens";
 import Finding from "../../finding";
 import Location from "../../location";
 import RNFS from 'react-native-fs';
-import LocationHandler from "../../location_handler/location_handler";
-import TagsInfo from "../../api_communicators/tags_info";
 import FindingCommunicator from "../../api_communicators/finding_communicator";
 import Image from '../../image';
 import ImageCommunicator from "../../api_communicators/image_communicator";
 import TagPicker from "../../tag_picker";
+import Geolocation from 'react-native-geolocation-service';
 
 
 export default class UploadScreen extends Component {
@@ -19,10 +18,12 @@ export default class UploadScreen extends Component {
         super(props);
 
         this.state = {
-            tagPopupVisible: false
+            tagPopupVisible: false,
+            locationAccuracy: null,
+            location: null,
+            timerId: null
         }
         this.image_data = props.route.params.image_data;
-        this.getLocation();
     }
 
     navToMap = () => {
@@ -34,16 +35,9 @@ export default class UploadScreen extends Component {
         this.props.navigation.navigate(NavigationScreens.VIEW_IMAGE, {image_data: imageData});
     }
     
-    getLocation = async () => {
-        await LocationHandler.requestLocationPermission();
-        await LocationHandler.getLocation(this.setLatLng, this.onPermissionRejected);
-    }
-    setLatLng = (position) => {
-        this.location = new Location(position.coords.longitude, position.coords.latitude)
-    }
-    onPermissionRejected = () => {
-        Alert.alert("You need to enable location!!");
-        this.navToMap();
+    onPermissionRejected = (err) => {
+        Alert.alert(err.message)
+        console.log(err);
     }
 
     renderTagsPicker = () => {
@@ -56,16 +50,22 @@ export default class UploadScreen extends Component {
     }   
 
     onUploadPress = async () => {
-        if (this.tags != null && this.image_data != null && this.location != null) {
-            const timestamp = this.getCurrentTimestamp()
-            const image = await this.processImageData(this.image_data);
-            const finding = new Finding(timestamp, this.location, this.tags, image.hash);
-            await FindingCommunicator.upload(finding);
-            await ImageCommunicator.upload(image);
-            this.navToMap();
+        if (this.state.locationAccuracy < 50) {
+            if (this.tags != null && this.image_data != null && this.state.location != null) {
+                const timestamp = this.getCurrentTimestamp()
+                const image = await this.processImageData(this.image_data);
+                const finding = new Finding(timestamp, this.state.location, this.tags, image.hash);
+                await FindingCommunicator.upload(finding);
+                await ImageCommunicator.upload(image);
+                this.navToMap();
+            } else {
+                Alert.alert('You did not finish all the steps');
+            }
+            Geolocation.stopObserving();
         } else {
-            Alert.alert('You did not finish all the steps');
+            Alert.alert("Accuracy is still low, wait...");
         }
+        
     }
     getCurrentTimestamp() {
         return Math.floor(Date.now())
@@ -79,13 +79,42 @@ export default class UploadScreen extends Component {
         return image;
     }
 
+    componentDidMount = () => {
+        console.log("Starting")
+        this.setState({ 
+            timeId: Geolocation.watchPosition(
+                this.onSuccess, 
+                this.onPermissionRejected,
+                {
+                    enableHighAccuracy: true,
+                    interval: 2000,
+                    fastestInterval: 1000,
+                    distanceFilter: 2
+                }
+            ) 
+        });
+        
+    }
+    onSuccess = (position) => {
+        const coords = position.coords;
+        console.log(Date.now(), coords.accuracy, new Location(coords.longitude, coords.latitude));
+        this.setState({
+            locationAccuracy: coords.accuracy,
+            location: new Location(coords.longitude, coords.latitude)
+        })
+    }
+    componentWillUnmount = () => {
+        Geolocation.clearWatch(this.state.timeId);
+    }
+
     render() {
         return (
             <View>
                 <Button title="View Image" onPress={this.onViewImagePress}/>
                 {this.renderTagsPicker()}
+                <Button title="Location" onPress={this.onLocationPress}/>
                 <Button title="Upload" onPress={this.onUploadPress}/>
-
+                <Text>{"Accuracy: " + this.state.locationAccuracy}</Text>
                 <View>
                     <Modal visible={this.state.tagPopupVisible}>
                         <View>
@@ -93,7 +122,6 @@ export default class UploadScreen extends Component {
                         </View>
                     </Modal>
                 </View>
-                
             </View>
         );
     }
